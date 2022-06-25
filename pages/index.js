@@ -1,10 +1,17 @@
-import { Box, Button, Card, Container, Grid, Typography } from "@mui/material";
+import { useEffect, useRef, useState } from "react";
+import Image from 'next/image';
+import { Box, Button, Card, Container, Grid, ImageList, ImageListItem, Typography } from "@mui/material";
 import { Formik, Form, Field } from 'formik';
 import { TextField } from 'formik-mui';
-import AddIcon from '@mui/icons-material/Add';
 import { validateForm } from "../validators/formValidations";
+import UploadingBackdrop from '../components/UploadingBackdrop'
+import AddImage from "../components/AddImage";
 
 export default function Home() {
+
+  const hiddenFileInput = useRef(null);
+  const [images, setImages] = useState([]);
+  const [imageURLs, setImageURLs] = useState([]);
 
   const initialFormValues = {
     firstName: '',
@@ -15,13 +22,35 @@ export default function Home() {
   };
 
   const handleSubmit = (values, { setSubmitting }) => {
-    console.log('setSubmitting: ', setSubmitting);
-    console.log('values: ', values);
+    setTimeout(() => {
+      setSubmitting(false);
+      console.log('values: ', {...values, images });
+    }, 5000);
   }
 
   const isSaveButtonDisabled = (errors, touched) => {
     return Object.keys(touched).length === 0 || Object.keys(errors).length !== 0;
   }
+
+  const handleFileChange = (event) => {
+    // @ts-ignore
+    setImages([...images, event.target.files[0]]);
+  }
+
+  const handleAddImage = (event) => {
+    // @ts-ignore
+    hiddenFileInput.current.click();
+  }
+
+  useEffect(() => {
+    if(images.length < 1) return;
+    
+    const newImageUrls = [];
+    images.forEach(image => newImageUrls.push(URL.createObjectURL(image)));
+    // @ts-ignore
+    setImageURLs(newImageUrls);
+  }, [images])
+  
 
   return (
     <Container maxWidth="lg">
@@ -43,11 +72,29 @@ export default function Home() {
                 <Grid item xs={12} mt={3}>
                   <Field component={TextField} name="email" label="Email Address" type="email" fullWidth />
                 </Grid>
+                <Grid item xs={12} mt={3}>
+                  <ImageList cols={2}>
+                    {imageURLs.map((imageSrc, index) => (
+                      <ImageListItem key={index}>
+                        <Image
+                          src={imageSrc}
+                          loading="lazy"
+                          alt="image"
+                          width="100%"
+                          height={300}
+                          objectFit="cover"
+                        />
+                      </ImageListItem>
+                    ))}
+                  </ImageList>
+                </Grid>
               </Grid>
               <Box display='flex' mt={6} justifyContent="flex-end">
-                <Button startIcon={<AddIcon />}>Add Image</Button>
-                <Button variant="contained" sx={{ marginLeft: '20px' }} disabled={isSaveButtonDisabled(errors, touched)}>Save</Button>
+                <AddImage fileInputRef={hiddenFileInput} onFileChange={handleFileChange} onAddImage={handleAddImage} />
+                <Button variant="contained" sx={{ marginLeft: '20px' }} disabled={isSaveButtonDisabled(errors, touched)} 
+                        type="submit">Save</Button>
               </Box>
+              { isSubmitting && (<UploadingBackdrop isSubmitting={isSubmitting} />) }
             </Form>
           )}
         </Formik>
