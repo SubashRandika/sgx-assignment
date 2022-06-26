@@ -6,12 +6,15 @@ import { TextField } from 'formik-mui';
 import { validateForm } from "../validators/formValidations";
 import UploadingBackdrop from '../components/UploadingBackdrop'
 import AddImage from "../components/AddImage";
+import EmailSentDialog from "../components/EmailSentDialog";
 
 export default function Home() {
 
   const hiddenFileInput = useRef(null);
   const [images, setImages] = useState([]);
   const [imageURLs, setImageURLs] = useState([]);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [dialogContent, setDialogContent] = useState('');
 
   const initialFormValues = {
     firstName: '',
@@ -21,7 +24,7 @@ export default function Home() {
     images: []
   };
 
-  const handleSubmit = async (values, { setSubmitting }) => {
+  const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     const data = {...values, images };
     const response = await fetch("/api/sendEmail", {
       method: "POST",
@@ -32,8 +35,19 @@ export default function Home() {
       body: JSON.stringify(data)
     });
     const result = await response.json();
-    console.log('result: ', result);
-    setSubmitting(false);
+
+    if(result.status === 200) {
+      setDialogContent(`&#127881; ${result.message}, please check your inbox for the form details.
+                        <br>${result.url ? 
+                        `<a href='${result.url}' style="color: #226fc8; text-decoration: underline" target='__blank'>Go to email</a>`: ``}`);
+      setOpenDialog(true);
+      setSubmitting(false);
+      resetForm();
+    }
+  }
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
   }
 
   const isSaveButtonDisabled = (errors, touched) => {
@@ -106,6 +120,7 @@ export default function Home() {
             </Form>
           )}
         </Formik>
+        <EmailSentDialog title="Email Sent" content={dialogContent} isOpen={openDialog} handleOnClose={handleCloseDialog} />
       </Card>
     </Container>
   )

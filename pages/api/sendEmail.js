@@ -4,7 +4,7 @@ export default function handler(req, res) {
 
   let mailConfig = getMailConfig();
   const transporter = nodemailer.createTransport(mailConfig);
-  const fromEmail = process.env.NODE_ENV === "production" ? process.env.PROD_USER : process.env.DEV_USER;
+  const fromEmail = process.env.ENVIRONMENT === "production" ? process.env.PROD_USER : process.env.DEV_USER;
 
   const mailData = {
     from: fromEmail,
@@ -14,8 +14,8 @@ export default function handler(req, res) {
   }
 
   transporter.sendMail(mailData).then((info) => {
-    const previewUrl = nodemailer.getTestMessageUrl(info);
-    res.status(200).json(
+    const previewUrl = process.env.ENVIRONMENT === 'production' ? null : nodemailer.getTestMessageUrl(info);
+    return res.status(200).json(
       { 
         status: 200, 
         message: "Email is successfully sent", 
@@ -23,17 +23,17 @@ export default function handler(req, res) {
       }
     );
   }).catch((err) => {
-    res.status(500).json(
+    return res.status(500).json(
       { 
         status: 500, 
-        message: "Email send failed. Please try again" 
+        message: "Email send failed. Please try again"
       }
     );
   });
 }
 
 const getMailConfig = () => {
-  if(process.env.NODE_ENV === "production") {
+  if(process.env.ENVIRONMENT === "production") {
     return {
       port: 465,
       host: "smtp.gmail.com",
