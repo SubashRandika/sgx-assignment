@@ -1,0 +1,75 @@
+export default function handler(req, res) {
+  let nodemailer = require('nodemailer');
+  require('dotenv').config();
+
+  let mailConfig = getMailConfig();
+  const transporter = nodemailer.createTransport(mailConfig);
+  const fromEmail = process.env.NODE_ENV === "production" ? process.env.PROD_USER : process.env.DEV_USER;
+
+  const mailData = {
+    from: fromEmail,
+    to: req.body.email,
+    subject: `User ${req.body.firstName} ${req.body.lastName} details`,
+    html: getEmailTemplate(req.body, fromEmail)
+  }
+
+  transporter.sendMail(mailData).then((info) => {
+    const previewUrl = nodemailer.getTestMessageUrl(info);
+    res.status(200).json(
+      { 
+        status: 200, 
+        message: "Email is successfully sent", 
+        url: previewUrl 
+      }
+    );
+  }).catch((err) => {
+    res.status(500).json(
+      { 
+        status: 500, 
+        message: "Email send failed. Please try again" 
+      }
+    );
+  });
+}
+
+const getMailConfig = () => {
+  if(process.env.NODE_ENV === "production") {
+    return {
+      port: 465,
+      host: "smtp.gmail.com",
+      auth: {
+        user: process.env.PROD_USER,
+        pass: process.env.PROD_PASS
+      },
+      secure: true
+    };
+  } else {
+    return {
+      host: 'smtp.ethereal.email',
+      port: 587,
+      auth: {
+          user: process.env.DEV_USER,
+          pass: process.env.DEV_PASS
+      }
+    };
+  }
+}
+
+const getEmailTemplate = (data, from) => {
+  return `
+    <div>
+      <div>
+        <span>User: </span><span>${data.firstName} ${data.lastName}</span>
+      </div>
+      <div>
+        <span>Description: </span><span>${data.description}</span>
+      </div>
+      <div>
+        <span>Email: </span><span>${data.email}</span>
+      </div>
+      <div>
+        <span>Sent From: </span><span>${from}</span>
+      </div>
+    </div>
+  `
+}

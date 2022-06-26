@@ -21,11 +21,19 @@ export default function Home() {
     images: []
   };
 
-  const handleSubmit = (values, { setSubmitting }) => {
-    setTimeout(() => {
-      setSubmitting(false);
-      console.log('values: ', {...values, images });
-    }, 5000);
+  const handleSubmit = async (values, { setSubmitting }) => {
+    const data = {...values, images };
+    const response = await fetch("/api/sendEmail", {
+      method: "POST",
+      headers: {
+        "Accept": "application/json, text/plain, */*",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    });
+    const result = await response.json();
+    console.log('result: ', result);
+    setSubmitting(false);
   }
 
   const isSaveButtonDisabled = (errors, touched) => {
