@@ -15,6 +15,7 @@ export default function Home() {
   const [imageURLs, setImageURLs] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogContent, setDialogContent] = useState('');
+  const [dialogTitle, setDialogTitle] = useState('');
 
   const initialFormValues = {
     firstName: '',
@@ -37,13 +38,19 @@ export default function Home() {
     const result = await response.json();
 
     if(result.status === 200) {
+      setDialogTitle("Email Sent");
       setDialogContent(`&#127881; ${result.message}, please check your inbox for the form details.
                         <br>${result.url ? 
                         `<a href='${result.url}' style="color: #226fc8; text-decoration: underline" target='__blank'>Go to email</a>`: ``}`);
-      setOpenDialog(true);
-      setSubmitting(false);
-      resetForm();
+      
+    } else {
+      setDialogTitle("Email Sent Failed");
+      setDialogContent(`&#10060; ${result.message}`);
     }
+
+    setOpenDialog(true);
+    setSubmitting(false);
+    resetForm();
   }
 
   const handleCloseDialog = () => {
@@ -120,7 +127,7 @@ export default function Home() {
             </Form>
           )}
         </Formik>
-        <EmailSentDialog title="Email Sent" content={dialogContent} isOpen={openDialog} handleOnClose={handleCloseDialog} />
+        <EmailSentDialog title={dialogTitle} content={dialogContent} isOpen={openDialog} handleOnClose={handleCloseDialog} />
       </Card>
     </Container>
   )
