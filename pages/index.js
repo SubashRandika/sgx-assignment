@@ -50,6 +50,8 @@ export default function Home() {
 
     setOpenDialog(true);
     setSubmitting(false);
+    setImages([]);
+    setImageURLs([]);
     resetForm();
   }
 
@@ -79,7 +81,6 @@ export default function Home() {
     // @ts-ignore
     setImageURLs(newImageUrls);
   }, [images])
-  
 
   return (
     <Container maxWidth="lg">
@@ -101,7 +102,7 @@ export default function Home() {
                 <Grid item xs={12} mt={3}>
                   <Field component={TextField} name="email" label="Email Address" type="email" fullWidth />
                 </Grid>
-                <Grid item xs={12} mt={3}>
+                {imageURLs.length > 0 && (<Grid item xs={12} mt={3}>
                   <ImageList cols={2}>
                     {imageURLs.map((imageSrc, index) => (
                       <ImageListItem key={index}>
@@ -116,7 +117,7 @@ export default function Home() {
                       </ImageListItem>
                     ))}
                   </ImageList>
-                </Grid>
+                </Grid>)}
               </Grid>
               <Box display='flex' mt={6} justifyContent="flex-end">
                 <AddImage fileInputRef={hiddenFileInput} onFileChange={handleFileChange} onAddImage={handleAddImage} />
