@@ -12,7 +12,6 @@ export default function Home() {
 
   const hiddenFileInput = useRef(null);
   const [images, setImages] = useState([]);
-  const [imageURLs, setImageURLs] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogContent, setDialogContent] = useState('');
   const [dialogTitle, setDialogTitle] = useState('');
@@ -51,7 +50,6 @@ export default function Home() {
     setOpenDialog(true);
     setSubmitting(false);
     setImages([]);
-    setImageURLs([]);
     resetForm();
   }
 
@@ -63,24 +61,24 @@ export default function Home() {
     return Object.keys(touched).length === 0 || Object.keys(errors).length !== 0;
   }
 
+  const toBase64 = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);  
+  });
+  
   const handleFileChange = (event) => {
-    // @ts-ignore
-    setImages([...images, event.target.files[0]]);
+    toBase64(event.target.files[0]).then(dataUri => {
+      // @ts-ignore
+      setImages([...images, dataUri]);
+    });
   }
 
   const handleAddImage = (event) => {
     // @ts-ignore
     hiddenFileInput.current.click();
   }
-
-  useEffect(() => {
-    if(images.length < 1) return;
-    
-    const newImageUrls = [];
-    images.forEach(image => newImageUrls.push(URL.createObjectURL(image)));
-    // @ts-ignore
-    setImageURLs(newImageUrls);
-  }, [images])
 
   return (
     <Container maxWidth="lg">
@@ -102,9 +100,9 @@ export default function Home() {
                 <Grid item xs={12} mt={3}>
                   <Field component={TextField} name="email" label="Email Address" type="email" fullWidth />
                 </Grid>
-                {imageURLs.length > 0 && (<Grid item xs={12} mt={3}>
+                {images.length > 0 && (<Grid item xs={12} mt={3}>
                   <ImageList cols={2}>
-                    {imageURLs.map((imageSrc, index) => (
+                    {images.map((imageSrc, index) => (
                       <ImageListItem key={index}>
                         <Image
                           src={imageSrc}

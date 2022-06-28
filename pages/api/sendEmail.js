@@ -6,12 +6,7 @@ export default function handler(req, res) {
   const transporter = nodemailer.createTransport(mailConfig);
   const fromEmail = process.env.ENVIRONMENT === "production" ? process.env.PROD_USER : process.env.DEV_USER;
 
-  const mailData = {
-    from: fromEmail,
-    to: req.body.email,
-    subject: `User ${req.body.firstName} ${req.body.lastName} details`,
-    html: getEmailTemplate(req.body, fromEmail)
-  }
+  const mailData = getMailData(req.body, fromEmail);
 
   transporter.sendMail(mailData).then((info) => {
     const previewUrl = process.env.ENVIRONMENT === 'production' ? null : nodemailer.getTestMessageUrl(info);
@@ -30,6 +25,25 @@ export default function handler(req, res) {
       }
     );
   });
+}
+
+const getMailData = (body, fromEmail) => {
+  const mailInfo = {
+    from: fromEmail,
+    to: body.email,
+    subject: `User ${body.firstName} ${body.lastName} details`,
+    attachments: [],
+    html: getEmailTemplate(body, fromEmail)
+  }
+
+  body.images.forEach(image => {
+    mailInfo.attachments.push({
+      // @ts-ignore
+      path: `${image}`
+    });
+  });
+
+  return mailInfo;
 }
 
 const getMailConfig = () => {
@@ -72,4 +86,12 @@ const getEmailTemplate = (data, from) => {
       </div>
     </div>
   `
+}
+
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '10mb',
+    },
+  },
 }
