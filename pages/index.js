@@ -4,6 +4,7 @@ import { Box, Button, Card, Container, Grid, ImageList, ImageListItem, Typograph
 import { Formik, Form, Field } from 'formik';
 import { TextField } from 'formik-mui';
 import { validateForm } from "../validators/formValidations";
+import { toBase64 } from '../utils/imageToBase64';
 import UploadingBackdrop from '../components/UploadingBackdrop'
 import AddImage from "../components/AddImage";
 import EmailSentDialog from "../components/EmailSentDialog";
@@ -60,13 +61,6 @@ export default function Home() {
   const isSaveButtonDisabled = (errors, touched) => {
     return Object.keys(touched).length === 0 || Object.keys(errors).length !== 0;
   }
-
-  const toBase64 = (file) => new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = error => reject(error);  
-  });
   
   const handleFileChange = (event) => {
     toBase64(event.target.files[0]).then(dataUri => {

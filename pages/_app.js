@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { CacheProvider } from '@emotion/react';
 import { CssBaseline, ThemeProvider } from '@mui/material';
-import createEmotionCache from '../utility/createEmotionCache';
+import createEmotionCache from '../utils/createEmotionCache';
 import lightTheme from '../styles/theme/lightTheme';
 import '../styles/globals.css';
 
