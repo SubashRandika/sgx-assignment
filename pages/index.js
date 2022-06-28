@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Image from 'next/image';
 import { Box, Button, Card, Container, Grid, ImageList, ImageListItem, Typography } from "@mui/material";
 import { Formik, Form, Field } from 'formik';
